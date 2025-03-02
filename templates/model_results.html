@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Model Results{% endblock %}
+
+{% block content %}
+        <div class="mt-4 mb-4">
+            <h3 class="text-center m-3">Model Performance Comparison</h3>
+        </div>
+        <table class="table table-bordered table-striped">
+            <thead class="thead-light bg-dark text-light">
+                <tr>
+                    <th>Model</th>
+                    <th>Accuracy</th>
+                    <th>Precision</th>
+                    <th>Recall</th>
+                    <th>F1-Score</th>
+                    <th>ROC-AUC</th>
+                </tr>
+            </thead>
+            <tbody>
+    
+                {% for model in results %}
+                <tr>
+                    <td>{{model}}</td>
+                    {% for key in results[model].keys() %}
+                        <td>{{ results[model][key] }}</td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="mt-4 mb-4 col-sm-12 col-md-12 col-lg-12">
+            <iframe src="{{ image_path }}" class="model_results "></iframe>
+        </div>
+{% endblock %}

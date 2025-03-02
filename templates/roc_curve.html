@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}ROC Curve{% endblock %}
+
+{% block content %}
+    <div class="row g-4">
+        {% for image in roc_curve_images %}
+            <div class="col-lg-12 col-md-12 col-sm-12 d-flex justify-content-center">
+                <iframe src="{{ url_for('static', filename= relative_roc_path + '/' + image) }}" class="roc mb-5 mt-1"></iframe>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}

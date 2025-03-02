@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Dashboard{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Bank Churn Predictor</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/predict">Predict Churn</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">Dashboard</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Buttons for Navigation -->
+    <div class="container mt-3">
+        <div class="btn-group d-flex" role="group">
+            <a href="{{ url_for('data_visualization') }}" class="btn btn-warning w-100">Data Visualization</a>
+            <a href="{{ url_for('confusion_matrices') }}" class="btn btn-info w-100">Confusion Matrices</a>
+            <a href="{{ url_for('model_results') }}" class="btn btn-warning w-100">Model Results</a>
+            <a href="{{ url_for('roc_curve') }}" class="btn btn-info w-100">ROC Curve</a>
+        </div>
+    </div>
+
+    <!-- Page Content -->
+    <div class="container mt-4">
+        {% block content %}{% endblock %}
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(function() {
+                document.querySelectorAll(".confusion-matrix").forEach(function(iframe) {
+                    iframe.src = iframe.getAttribute("data-src");
+                    iframe.style.display = "block";
+                    iframe.previousElementSibling.style.display = "none";
+                });
+            }, 500);
+        });
+    </script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

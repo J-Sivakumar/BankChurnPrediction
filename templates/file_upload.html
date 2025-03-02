@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Dataset</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.css') }}">
+    <style>
+        #progress-container {
+            max-height: 300px; 
+            overflow-y: auto;  
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+            background: #f9f9f9;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Bank Churn Predictor</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item"><a class="nav-link active" href="/">Home</a></li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/predict">Predict Churn</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">Dashboard</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+
+    <div class="container mt-5">
+        <h2 class="text-center">Upload a Dataset to Train Models</h2>
+        <form action="{{ url_for('upload_file') }}" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="file" class="form-label">Choose CSV File:</label>
+                <input type="file" name="file" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Upload & Train</button>
+        </form>
+
+        <div id="progress-container" class="mt-4">
+            <h5>Live Progress Updates</h5>
+            <div id="flash-messages"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            let eventSource = new EventSource("{{ url_for('progress') }}"); 
+            let container = document.getElementById("flash-messages");
+            let progressContainer = document.getElementById("progress-container");
+            let isUserScrolling = false; 
+            let storedMessages = JSON.parse(sessionStorage.getItem("progressMessages")) || []; 
+            let hasLiveMessages = false; 
+    
+            progressContainer.addEventListener("scroll", function () {
+                isUserScrolling = !(progressContainer.scrollHeight - progressContainer.scrollTop <= progressContainer.clientHeight + 10);
+            });
+
+            eventSource.onmessage = function (event) {
+                if (event.data.trim() !== "") {
+                    let [category, message] = event.data.split("|");
+                    hasLiveMessages = true; 
+                    let alertDiv = document.createElement("div");
+                    alertDiv.className = `alert alert-${category} fade show mt-2`;
+                    alertDiv.role = "alert";
+                    alertDiv.textContent = message;
+    
+                    container.appendChild(alertDiv);
+    
+                    if (!isUserScrolling) {
+                        progressContainer.scrollTop = progressContainer.scrollHeight;
+                    }
+    
+                    storedMessages.push(alertDiv.outerHTML);
+                    sessionStorage.setItem("progressMessages", JSON.stringify(storedMessages));
+                }
+            };
+    
+            eventSource.onerror = function () {
+                eventSource.close();
+            };
+
+            setTimeout(() => {
+                if (!hasLiveMessages && storedMessages.length > 0) {
+                    container.innerHTML = storedMessages.join("");
+                    progressContainer.scrollTop = progressContainer.scrollHeight;
+                    sessionStorage.removeItem("progressMessages"); 
+                    setTimeout(() => {
+                        container.innerHTML = "";
+                    }, 3000);
+                }
+            }, 1); 
+        });
+    </script>
+    
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
+</body>
+</html>

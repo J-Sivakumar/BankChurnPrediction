@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predict Churn</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='/css/bootstrap.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='/css/style.css') }}">
+
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Bank Churn Predictor</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+    aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/predict">Predict Churn</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/dashboard">Dashboard</a>
+                    </li>
+                    
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <div class="container mt-5">        
+        <form method="post" action="/predict" class="mt-4 needs-validation" novalidate>
+            <div class="row">
+                <div class="col-md-6">
+                    <!-- Name -->
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Name</label>
+                        <input type="text" id="name" name="Name" class="form-control" value="{{ form_data['Name'] if form_data else '' }}">
+                    </div>
+                      <!-- Balance -->
+                      <div class="mb-3">
+                        <label class="form-label" for="Balance">Balance</label>
+                        <input type="number" id="Balance" name="Balance" value="{{ form_data['Balance'] if form_data else '0' }}" class="form-control" required>
+                    </div>
+                    <!-- Estimated Salary -->
+                    <div class="mb-3">
+                        <label class="form-label" for="EstimatedSalary">Estimated Salary</label>
+                        <input type="number" id="EstimatedSalary" name="EstimatedSalary" value="{{ form_data['EstimatedSalary'] if form_data else '0' }}" class="form-control" required>
+                    </div>
+                    <!-- Gender -->
+                    <div class="mb-1 row align-items-center">
+                        <label class="col-auto col-form-label">Gender</label>
+                        <div class="col text-end">
+                            <div class="form-check form-check-inline">
+                                <input type="radio" class="form-check-input" id="genderMale" name="Gender" value="1" 
+                                {% if form_data and form_data['Gender'] == '1' %}checked{% endif %}
+                                required>
+                                <label class="form-check-label" for="genderMale">Male</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input type="radio" class="form-check-input" id="genderFemale" name="Gender" value="0"
+                                {% if form_data and form_data['Gender'] == '0' %}checked{% endif %}
+                                required>
+                                <label class="form-check-label" for="genderFemale">Female</label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Has Credit Card -->
+                    <div class="mb-1 row align-items-center">
+                        <label class="col-auto col-form-label">Do you have a Credit Card?</label>
+                        <div class="col text-end">
+                            <div class="form-check form-check-inline">
+                                <input type="radio" class="form-check-input" id="hasCrCardYes" name="HasCrCard" value="1"
+                                {% if form_data and form_data['HasCrCard'] == '1' %}checked{% endif %} required>
+                                <label class="form-check-label" for="hasCrCardYes">Yes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input type="radio" class="form-check-input" id="hasCrCardNo" name="HasCrCard" value="0" {% if form_data and form_data['HasCrCard'] == '0' %}checked{% endif %}
+                                 required>
+                                <label class="form-check-label" for="hasCrCardNo">No</label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Is Active Member -->
+                    <div class="mb-1 row align-items-center">
+                        <label class="col-auto col-form-label">Are you an Active Bank Customer?</label>
+                        <div class="col text-end">
+                            <div class="form-check form-check-inline">
+                                <input type="radio" class="form-check-input" id="isActiveMemberYes" name="isActiveMember" value="1" {% if form_data and form_data['isActiveMember'] == '1' %}checked{% endif %} required>
+                                <label class="form-check-label" for="isActiveMemberYes">Yes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input type="radio" class="form-check-input" id="isActiveMemberNo" name="isActiveMember" value="0" {% if form_data and form_data['isActiveMember'] == '0' %}checked{% endif %} required>
+                                <label class="form-check-label" for="isActiveMemberNo">No</label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Tenure -->
+                    <div class="mb-3">
+                        <label class="form-label" for="Tenure">Tenure</label>
+                        <select name="Tenure" id="Tenure" class="form-select" required>
+                            <option selected disabled value="">Select Tenure</option>
+                            <option value="0" {% if form_data and form_data['Tenure'] == '0' %}selected{% endif %}>Less than 1 year</option>
+                            <option value="1" {% if form_data and form_data['Tenure'] == '1' %}selected{% endif %}>1 - 3 years</option>
+                            <option value="2" {% if form_data and form_data['Tenure'] == '2' %}selected{% endif %}>3 - 5 years</option>
+                            <option value="3" {% if form_data and form_data['Tenure'] == '3' %}selected{% endif %}>5 - 10 years</option>
+                            <option value="4" {% if form_data and form_data['Tenure'] == '4' %}selected{% endif %}>More than 10 years</option>
+                        </select>
+                    </div>
+                    <!-- Number of Complaints -->
+                    <div class="mb-3">
+                        <label class="form-label" for="NoOfComplaints">Number of Complaints</label>
+                        <input type="number" id="NoOfComplaints" name="NoOfComplaints" class="form-control" value="{{ form_data['NoOfComplaints'] if form_data else '' }}" min="0" max ='10' required>
+                    </div>
+                    <!-- Complaints Severity -->
+                    <div class="mb-3">
+                        <label class="form-label" for="ComplaintsSeverity">Complaints Severity</label>
+                        <select name="ComplaintsSeverity" id="ComplaintsSeverity" class="form-select" required>
+                            <option selected disabled value="">Select Severity</option>
+                            <option value="0" {% if form_data and form_data['ComplaintsSeverity'] == '0' %}selected{% endif %}>No Issue</option>
+                            <option value="1" {% if form_data and form_data['ComplaintsSeverity'] == '1' %}selected{% endif %}>Minor Issue</option>
+                            <option value="2" {% if form_data and form_data['ComplaintsSeverity'] == '2' %}selected{% endif %}>Moderate Issue</option>
+                            <option value="3" {% if form_data and form_data['ComplaintsSeverity'] == '3' %}selected{% endif %}>Major Issue</option>
+                            <option value="4" {% if form_data and form_data['ComplaintsSeverity'] == '4' %}selected{% endif %}>Severe Issue</option>
+                        </select>
+                    </div>
+                    <!-- Satisfaction of Resolution -->
+                    <div class="mb-3">
+                        <label class="form-label" for="SatOfRes">Satisfaction of Resolution</label>
+                        <select name="SatOfRes" id="SatOfRes" class="form-select" required>
+                            <option selected disabled value="">Select Satisfaction</option>
+                            <option value="1" {% if form_data and form_data['SatOfRes'] == '1' %}selected{% endif %}>Very Dissatisfied</option>
+                            <option value="2" {% if form_data and form_data['SatOfRes'] == '2' %}selected{% endif %}>Dissatisfied</option>
+                            <option value="3" {% if form_data and form_data['SatOfRes'] == '3' %}selected{% endif %}>Neutral</option>
+                            <option value="4" {% if form_data and form_data['SatOfRes'] == '4' %}selected{% endif %}>Satisfied</option>
+                            <option value="5" {% if form_data and form_data['SatOfRes'] == "5" %}selected{% endif %}>Very Satisfied</option>
+                        </select>
+                    </div>
+                    <!-- Recommend to Others -->
+                    <div class="mb-3">
+                        <label class="form-label" for="RecomToOthers">Recommend to Others(Rating: 1- 5)</label>
+                        <input type="number" id="RecomToOthers" name="RecomToOthers" class="form-control" value="{{ form_data['RecomToOthers'] if form_data else '' }}" min="1" max="5" required>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <!-- Age Group -->
+                    <div class="mb-3">
+                        <label class="form-label" for="AgeGroup">Age Group</label>
+                        <select name="AgeGroup" id="AgeGroup" class="form-select" required>
+                            <option selected disabled value="">Select Age Group</option>
+                            <option value="0" {% if form_data and form_data['AgeGroup'] == '0' %}selected{% endif %}>Below 18</option>
+                            <option value="1" {% if form_data and form_data['AgeGroup'] == '1' %}selected{% endif %}>18 - 25</option>                    
+                            <option value="2" {% if form_data and form_data['AgeGroup'] == '2' %}selected{% endif %}>26 - 35</option>
+                            <option value="3" {% if form_data and form_data['AgeGroup'] == '3' %}selected{% endif %}>36 - 45</option>
+                            <option value="4" {% if form_data and form_data['AgeGroup'] == '4' %}selected{% endif %}>46 - 60</option>
+                            <option value="5" {% if form_data and form_data['AgeGroup'] == '5' %}selected{% endif %}>Above 60</option>
+                        </select>
+                    </div>
+                    <!-- Frequency of Use -->
+                <div class="mb-3">
+                    <label class="form-label" for="FreqUse">Frequency of Use</label>
+                    <select name="FreqUse" id="FreqUse" class="form-select" required>
+                        <option selected disabled value="">Select Frequency</option>
+                        <option value="0" {% if form_data and form_data['FreqUse'] == '0' %}selected{% endif %}>Daily</option>
+                        <option value="1" {% if form_data and form_data['FreqUse'] == '1' %}selected{% endif %}>Weekly</option>
+                        <option value="2" {% if form_data and form_data['FreqUse'] == '2' %}selected{% endif %}>Monthly</option>
+                        <option value="3" {% if form_data and form_data['FreqUse'] == '3' %}selected{% endif %}>Rarely</option>
+                        <option value="4" {% if form_data and form_data['FreqUse'] == '4' %}selected{% endif %}>Never</option>
+                    </select>
+                </div>
+                    
+                    <!-- Number of Services -->
+                    <div class="mb-3">
+                        <label class="form-label" for="NoOfServices">Number of Services</label>
+                        <input type="number" id="NoOfServices" value="{{ form_data['NoOfServices'] if form_data else '' }}" name="NoOfServices" min="1" max="10" class="form-control" required>
+                    </div>
+                    <!-- Past Churn -->
+                    <div class="mb-1 row align-items-center">
+                        <label class="col-auto col-form-label">Have you switched to another bank in past?</label>
+                        <div class="col text-end">
+                            <div class="form-check form-check-inline">
+                                <input type="radio" class="form-check-input" id="pastChurnYes" name="PastChurn" value="1" {% if form_data and form_data['PastChurn'] == '1' %}checked{% endif %} required>
+                                <label class="form-check-label" for="pastChurnYes">Yes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input type="radio" class="form-check-input" id="pastChurnNo" name="PastChurn" {% if form_data and form_data['PastChurn'] == '0' %}checked{% endif %} value="0" required>
+                                <label class="form-check-label" for="pastChurnNo">No</label>
+                            </div>
+                        </div>
+                    </div>
+                        <!-- Charges Impact -->
+                        <div class="mb-1 row align-items-center">
+                            <label class="col-auto col-form-label">Does Charges Impact in churn?</label>
+                            <div class="col text-end">
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" class="form-check-input" id="chargesImpactYes" name="DoesChargesImpact" value="1" {% if form_data and form_data['DoesChargesImpact'] == '1' %}checked{% endif %} required>
+                                    <label class="form-check-label" for="chargesImpactYes">Yes</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" class="form-check-input" id="chargesImpactNo" name="DoesChargesImpact" value="0" {% if form_data and form_data['DoesChargesImpact'] == '0' %}checked{% endif %} required>
+                                    <label class="form-check-label" for="chargesImpactNo">No</label>
+                                </div>
+                            </div>
+                        </div>
+                    <!-- Has Complaints -->
+                    <div class="mb-1 row align-items-center">
+                        <label class="col-auto col-form-label">Has Complaints?</label>
+                        <div class="col text-end">
+                            <div class="form-check form-check-inline">
+                                <input type="radio" class="form-check-input" id="hasComplaintsYes" name="hasComplaints" {% if form_data and form_data['hasComplaints'] == '1' %}checked{% endif %} value="1" required>
+                                <label class="form-check-label" for="hasComplaintsYes">Yes</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input type="radio" class="form-check-input" id="hasComplaintsNo" name="hasComplaints" {% if form_data and form_data['hasComplaints'] == '0' %}checked{% endif %} value="0" required>
+                                <label class="form-check-label" for="hasComplaintsNo">No</label>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Overall Satisfaction -->
+                    <div class="mb-3">
+                        <label class="form-label" for="OverallSatisfaction">Overall Satisfaction</label>
+                        <select name="OverallSatisfaction" id="OverallSatisfaction" class="form-select" required>
+                            <option selected disabled value="">Select Satisfaction</option>
+                            <option value="1"  {% if form_data and form_data['OverallSatisfaction'] == '1' %}selected{% endif %}>Very Poor</option>
+                            <option value="2"  {% if form_data and form_data['OverallSatisfaction'] == '2' %}selected{% endif %}>Poor</option>
+                            <option value="3"  {% if form_data and form_data['OverallSatisfaction'] == '3' %}selected{% endif %}>Average</option>
+                            <option value="4"  {% if form_data and form_data['OverallSatisfaction'] == '4' %}selected{% endif %}>Good</option>
+                            <option value="5"  {% if form_data and form_data['OverallSatisfaction'] == '5' %}selected{% endif %}>Excellent</option>
+                        </select>
+                    </div>
+                    <!-- Online Banking Experience -->
+                    <div class="mb-3">
+                        <label class="form-label" for="OnlineBankingExperience">Online Banking Experience</label>
+                        <select id="OnlineBankingExperience" name="OnlineBankingExperience" class="form-select" required>
+                            <option selected disabled value="">Select Experience</option>
+                            <option value="1"  {% if form_data and form_data['OnlineBankingExperience'] == '1' %}selected{% endif %}>Very Dissatisfied</option>
+                            <option value="2" {% if form_data and form_data['OnlineBankingExperience'] == '2' %}selected{% endif %}>Dissatisfied</option>
+                            <option value="3" {% if form_data and form_data['OnlineBankingExperience'] == '3' %}selected{% endif %}>Neutral</option>
+                            <option value="4" {% if form_data and form_data['OnlineBankingExperience'] == '4' %}selected{% endif %}>Satisfied</option>
+                            <option value="5" {% if form_data and form_data['OnlineBankingExperience'] == '5' %}selected{% endif %}>Very Satisfied</option>
+                        </select>
+                    </div>
+                    <!-- Offline Banking Experience -->
+                    <div class="mb-3">
+                        <label class="form-label" for="OfflineBankingExperience">Offline Banking Experience</label>
+                        <select id="OfflineBankingExperience" name="OfflineBankingExperience" class="form-select" required>
+                            <option selected disabled value="">Select Experience</option>
+                            <option value="1" {% if form_data and form_data['OfflineBankingExperience'] == '1' %}selected{% endif %}>Very Dissatisfied</option>
+                            <option value="2" {% if form_data and form_data['OfflineBankingExperience'] == '2' %}selected{% endif %}>Dissatisfied</option>
+                            <option value="3" {% if form_data and form_data['OfflineBankingExperience'] == '3' %}selected{% endif %}>Neutral</option>
+                            <option value="4" {% if form_data and form_data['OfflineBankingExperience'] == '4' %}selected{% endif %}>Satisfied</option>
+                            <option value="5" {% if form_data and form_data['OfflineBankingExperience'] == '5' %}selected{% endif %}>Very Satisfied</option>
+                        </select>
+                    </div>
+                    <!-- ATM Experience -->
+                    <div class="mb-3">
+                        <label class="form-label" for="ATMexperience">ATM Experience</label>
+                        <select id="ATMexperience" name="ATMexperience" class="form-select" required>
+                            <option selected disabled value="">Select Experience</option>
+                            <option value="1" {% if form_data and form_data['ATMexperience'] == '1' %}selected{% endif %}>Very Dissatisfied</option>
+                            <option value="2" {% if form_data and form_data['ATMexperience'] == '2' %}selected{% endif %}>Dissatisfied</option>
+                            <option value="3" {% if form_data and form_data['ATMexperience'] == '3' %}selected{% endif %}>Neutral</option>
+                            <option value="4" {% if form_data and form_data['ATMexperience'] == '4' %}selected{% endif %}>Satisfied</option>
+                            <option value="5" {% if form_data and form_data['ATMexperience'] == '5' %}selected{% endif %}>Very Satisfied</option>
+                        </select>
+                    </div>
+                    <!-- Personalized Service -->
+                    <div class="mb-3">
+                        <label class="form-label" for="PersonalizedService">Personalized Service</label>
+                        <select id="PersonalizedService" name="PersonalizedService" class="form-select" required>
+                            <option selected disabled value="" value="">Select Service Level</option>
+                            <option value="1" {% if form_data and form_data['PersonalizedService'] == '1' %}selected{% endif %}>Very Dissatisfied</option>
+                            <option value="2" {% if form_data and form_data['PersonalizedService'] == '2' %}selected{% endif %}>Dissatisfied</option>
+                            <option value="3" {% if form_data and form_data['PersonalizedService'] == '3' %}selected{% endif %}>Neutral</option>
+                            <option value="4" {% if form_data and form_data['PersonalizedService'] == '4' %}selected{% endif %}>Satisfied</option>
+                            <option value="5" {% if form_data and form_data['PersonalizedService'] == '5' %}selected{% endif %}>Very Satisfied</option>
+                        </select>
+                    </div>
+                     
+                </div>
+            </div>
+            <!-- Submit Button -->
+            <div class="d-flex justify-content-center gap-3 mt-3 mb-3">
+                <button type="submit" class="btn btn-info w-50">Predict Churn</button>
+                <a href="{{ url_for('reset_form') }}" class="btn btn-warning">Reset</a>
+
+                
+            </div>
+        </form>
+        {% if prediction is not none %}
+        <div class="center-container ">
+            <h4>Prediction: <strong>{{ prediction }}</strong></h4>
+            <iframe src="{{ url_for('static', filename='images/churn_pie.html') }}" width="400" height="500" class="predict mt-3"></iframe>
+            
+        </div>
+        {% endif %}
+        
+
+    <script>
+ 
+        (function () {
+            'use strict';
+            var forms = document.querySelectorAll('.needs-validation');
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault();
+                        // event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        })();
+
+    </script>
+    
+    
+<script src="{{ url_for('static', filename='/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ url_for('static', filename='/js/bootstrap.js') }}"></script>
+<script src="{{ url_for('static', filename='/js/script.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block title %}Confusion Matrices{% endblock %}
+
+{% block content %}
+    <div class="row g-4">
+        {% for image in confusion_matrices %}
+
+            <div class="col-lg-6 col-md-12 col-sm-12 text-center">
+                <div class="loading-text" style="font-size: 16px;">Loading {{image[:-4]}}...</div>
+                
+                <iframe class="confusion-matrix"
+                        data-src="{{ url_for('static',  filename = path + '/' + image)}}"
+                        style="display: none; width: 100%; height: 500px; border: none;">
+                </iframe>
+            </div>
+            
+        {% endfor %}
+    </div>
+{% endblock %}

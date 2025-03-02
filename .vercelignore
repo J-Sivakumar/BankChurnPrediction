@@ -2,8 +2,6 @@ __pycache__/
 data/
 models/
 uploads/
-*.log
-*.tmp
 venv/
 .env
 .DS_Store

@@ -8,6 +8,26 @@ import plotly.express as px
 app = Flask(__name__)
 app.secret_key = "123#4%^&8(!9*!7!)"
 
+import os
+
+# Define required directories
+directories = [
+    "./static/images/",
+    "./models/pretrained/",
+    "./static/custom_images/",
+    "./models/custom/",
+    "./uploads/",
+    "./static/custom_images/roc_curves/",
+    "./static/images/roc_curves/",
+    "./static/custom_images/confusion_matrices/",
+    "./static/images/confusion_matrices/",
+    "./static/custom_images/visualizations/",
+    "./static/images/visualizations/"
+]
+
+for directory in directories:
+    os.makedirs(directory, exist_ok=True)
+
 file_path = "./data/Bank Customer Churn Data.csv"
 image_dir = "./static/images/"
 model_dir = "./models/pretrained/"

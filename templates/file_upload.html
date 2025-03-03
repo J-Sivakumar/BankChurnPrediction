@@ -99,7 +99,8 @@
                     sessionStorage.removeItem("progressMessages"); 
                     setTimeout(() => {
                         container.innerHTML = "";
-                    }, 3000);
+                        sessionStorage.removeItem("progressMessages");
+                    }, 1500);
                 }
             }, 1); 
         });

@@ -18,7 +18,6 @@ UPLOAD_FOLDER = "./uploads/"
 custom_file_name = None
 
 results = None
-# results = model_building.main(file_path=file_path, image_dir=image_dir, model_dir=model_dir)
 progress_queue = queue.Queue()
 
 @app.route('/')
@@ -42,20 +41,57 @@ def progress():
                 break
     return Response(generate(), mimetype="text/event-stream")
 
+ALLOWED_EXTENSIONS = {"csv"}
+
+def allowed_file(file):
+    if "." in file.filename and file.filename.rsplit(".", 1)[1].lower() in ALLOWED_EXTENSIONS:
+        return file.content_type in ["text/csv", "application/vnd.ms-excel"]
+    return False
+
+def has_same_columns(default_file, uploaded_file, progress_queue):
+    try:
+        default_df = pd.read_csv(default_file, nrows=1)
+        uploaded_df = pd.read_csv(uploaded_file, nrows=1)
+
+        if list(default_df.columns) == list(uploaded_df.columns):
+            return True
+        else:
+            message = f"Column mismatch. Expected: {list(default_df.columns)}, but got: {list(uploaded_df.columns)}"
+            progress_queue.put(("danger", message))
+            return False
+
+    except Exception as e:
+        message = f"Error reading CSV: {str(e)}"
+        progress_queue.put(("danger", message))
+        return False
+
 @app.route("/upload", methods=["POST"])
 def upload_file():
-    global results
     if "file" not in request.files:
         progress_queue.put(("danger", "No file part. Please upload a valid dataset."))
         return redirect(url_for("file_upload"))
     
     file = request.files["file"]
+    
     if file.filename.strip() == "":
         progress_queue.put(("danger", "No file selected. Please upload a valid dataset."))
         return redirect(url_for("file_upload"))
+    
+    if not allowed_file(file):
+        progress_queue.put(("danger", "Invalid file type. Please upload a CSV file."))
+        return redirect(url_for("file_upload"))
+
     custom_file_name = file.filename
     custom_file_path = os.path.join(UPLOAD_FOLDER, custom_file_name)
     file.save(custom_file_path)
+
+    file_path = "./data/Bank Customer Churn Data.csv"
+    columns_match = has_same_columns(file_path, custom_file_path, progress_queue)
+
+    if not columns_match:
+        os.remove(custom_file_path)
+        return redirect(url_for("file_upload"))
+
     progress_queue.put(("success", f"File '{custom_file_name}' uploaded successfully!"))
     time.sleep(1)
     
@@ -141,6 +177,9 @@ def predict():
 
 @app.route('/dashboard')
 def dashboard():
+    global results
+    if not session.get("use_custom_data"):
+        results = model_building.main(file_path=file_path, image_dir=image_dir, model_dir=model_dir)
     image_directory = custom_image_dir if session.get("use_custom_data") else image_dir
     return render_template("base.html", image_dir=image_directory)
 
@@ -156,7 +195,6 @@ def confusion_matrices():
     matrix_directory = os.path.join(custom_image_dir, "confusion_matrices") if session.get("use_custom_data") else os.path.join(image_dir, "confusion_matrices")
     confusion_matrices = os.listdir(matrix_directory) if os.path.exists(matrix_directory) else []
     path = matrix_directory.split('static/')[-1]
-    # print(session.get("use_custom_data"),matrix_directory.split('static/')[-1],matrix_directory,confusion_matrices)
     return render_template("confusion_matrices.html", confusion_matrices=confusion_matrices, path=path)
 
 @app.route('/model-results')
